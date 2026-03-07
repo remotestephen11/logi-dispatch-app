@@ -1,37 +1,42 @@
-:root {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #0f172a;
-  background: #f8fafc;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  :root {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  background: #f8fafc;
-  color: #0f172a;
-}
+  * {
+    box-sizing: border-box;
+  }
 
-a {
-  color: #0052a3;
-  text-decoration: none;
-}
+  body {
+    margin: 0;
+    min-width: 320px;
+    color: #0f172a;
+    background-image: linear-gradient(to bottom, #f8fafc, #ffffff);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-a:hover {
-  text-decoration: underline;
-}
+  a {
+    color: inherit;
+  }
 
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
+  button {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin-top: 0;
+  }
 }

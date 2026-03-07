@@ -29,7 +29,7 @@ function formatValue(key, value) {
   return String(value)
 }
 
-function StepReview({ values, attachmentName }) {
+function StepReview({ values, attachmentName, onEditContact, onEditShipment }) {
   const keys = [
     'full_name',
     'email',
@@ -46,22 +46,32 @@ function StepReview({ values, attachmentName }) {
   ]
 
   return (
-    <div className="quote-step">
-      <h2>Step 3: Review</h2>
-      <p>Confirm all details before submitting your quote request.</p>
-
-      <dl className="review-grid">
-        {keys.map((key) => (
-          <div key={key} className="review-item">
-            <dt>{formatLabel(key)}</dt>
-            <dd>{formatValue(key, values[key])}</dd>
-          </div>
-        ))}
-        <div className="review-item">
-          <dt>Attachment</dt>
-          <dd>{attachmentName || 'Not provided'}</dd>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-slate-900">Step 3: Review</h2>
+          <p className="mt-1 text-slate-600">Confirm all details before submitting your quote request.</p>
         </div>
-      </dl>
+        <div className="flex gap-3 text-sm">
+          <button type="button" onClick={onEditContact} className="font-semibold text-blue-700 hover:text-blue-800">Edit Contact</button>
+          <button type="button" onClick={onEditShipment} className="font-semibold text-blue-700 hover:text-blue-800">Edit Shipment</button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <dl className="grid gap-3 sm:grid-cols-2">
+          {keys.map((key) => (
+            <div key={key} className="rounded-lg bg-white p-3">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{formatLabel(key)}</dt>
+              <dd className="mt-1 text-sm text-slate-700">{formatValue(key, values[key])}</dd>
+            </div>
+          ))}
+          <div className="rounded-lg bg-white p-3 sm:col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Attachment</dt>
+            <dd className="mt-1 text-sm text-slate-700">{attachmentName || 'Not provided'}</dd>
+          </div>
+        </dl>
+      </div>
     </div>
   )
 }

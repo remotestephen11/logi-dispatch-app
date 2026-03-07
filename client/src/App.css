@@ -57,9 +57,8 @@
 }
 
 .page {
-  width: min(1100px, 92vw);
-  margin: 0 auto;
-  padding: 2rem 0;
+  width: 100%;
+  padding: 1rem 0;
 }
 
 .hero {

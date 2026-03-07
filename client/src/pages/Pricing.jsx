@@ -1,3 +1,6 @@
+import Button from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+
 const pricingTiers = [
   {
     name: 'Basic',
@@ -6,6 +9,7 @@ const pricingTiers = [
   },
   {
     name: 'Business',
+    popular: true,
     description: 'For growing operations handling city-wide and interstate requests.',
     bullets: ['Up to 250 deliveries/month', 'Priority dispatch assignment', 'Weekly performance and SLA reporting'],
   },
@@ -18,20 +22,38 @@ const pricingTiers = [
 
 function Pricing() {
   return (
-    <section className="page">
-      <h1>Pricing</h1>
-      <p>Choose a plan that matches your shipment volume and service-level needs.</p>
-      <div className="card-grid">
+    <section className="space-y-8 py-12 sm:py-16">
+      <div>
+        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Pricing Plans</h1>
+        <p className="mt-2 text-slate-600">Choose the service level that fits your route complexity and monthly volume.</p>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-3">
         {pricingTiers.map((tier) => (
-          <article key={tier.name} className="card">
-            <h2>{tier.name}</h2>
-            <p>{tier.description}</p>
-            <ul>
+          <Card
+            key={tier.name}
+            className={`relative ${tier.popular ? 'border-blue-200 shadow-lg ring-1 ring-blue-200' : ''}`}
+          >
+            {tier.popular && (
+              <span className="absolute -top-3 right-4 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
+                Most Popular
+              </span>
+            )}
+            <h2 className="text-2xl font-semibold text-slate-900">{tier.name}</h2>
+            <p className="mt-2 text-slate-600">{tier.description}</p>
+            <ul className="mt-4 space-y-2 text-slate-600">
               {tier.bullets.map((bullet) => (
-                <li key={bullet}>{bullet}</li>
+                <li key={bullet} className="flex items-start gap-2">
+                  <span className="text-green-600">✓</span>
+                  <span>{bullet}</span>
+                </li>
               ))}
             </ul>
-          </article>
+            <div className="mt-5">
+              <Button to="/quote" variant={tier.popular ? 'solid' : 'muted'} className="w-full">
+                Select {tier.name}
+              </Button>
+            </div>
+          </Card>
         ))}
       </div>
     </section>

@@ -6,6 +6,7 @@ import StepContact from './StepContact'
 import StepShipment from './StepShipment'
 import StepReview from './StepReview'
 import { API_BASE_URL } from '../../api/http'
+import Button from '../ui/Button'
 
 const optionalPositiveNumber = z.preprocess(
   (value) => {
@@ -192,31 +193,44 @@ function QuoteForm() {
 
   if (isSubmitted) {
     return (
-      <section className="quote-form-wrapper card">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         {toast && (
-          <div className={`toast toast-${toast.type}`} role="status" aria-live="polite">
+          <div className={`toast toast-${toast.type} mb-4`} role="status" aria-live="polite">
             {toast.message}
           </div>
         )}
-        <div className="quote-success-state">
-          <h2>Quote Request Submitted</h2>
-          <p>Thank you. Our team will review your details and contact you shortly.</p>
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-slate-900">Quote Request Submitted</h2>
+          <p className="mt-2 text-slate-600">Thank you. Our team will review your details and contact you shortly.</p>
         </div>
       </section>
     )
   }
 
   return (
-    <section className="quote-form-wrapper card">
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       {toast && (
-        <div className={`toast toast-${toast.type}`} role="status" aria-live="polite">
+        <div className={`toast toast-${toast.type} mb-4`} role="status" aria-live="polite">
           {toast.message}
         </div>
       )}
-      <div className="quote-progress" aria-label="Quote progress">
-        <span className={step === 1 ? 'progress-pill active' : 'progress-pill'}>Step 1</span>
-        <span className={step === 2 ? 'progress-pill active' : 'progress-pill'}>Step 2</span>
-        <span className={step === 3 ? 'progress-pill active' : 'progress-pill'}>Review</span>
+
+      <div className="mb-6" aria-label="Quote progress">
+        <div className="flex items-center gap-3">
+          {['Step 1', 'Step 2', 'Review'].map((label, index) => {
+            const indexStep = index + 1
+            const active = step >= indexStep
+            return (
+              <div key={label} className="flex flex-1 items-center gap-3">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${active ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                  {indexStep}
+                </div>
+                <span className={`text-sm font-medium ${active ? 'text-slate-900' : 'text-slate-500'}`}>{label}</span>
+                {index < 2 && <div className={`h-1 flex-1 rounded ${step > indexStep ? 'bg-blue-500' : 'bg-slate-200'}`} />}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -230,25 +244,28 @@ function QuoteForm() {
             onAttachmentChange={handleAttachmentChange}
           />
         )}
-        {step === 3 && <StepReview values={values} attachmentName={attachmentFile?.name} />}
+        {step === 3 && (
+          <StepReview
+            values={values}
+            attachmentName={attachmentFile?.name}
+            onEditContact={() => setStep(1)}
+            onEditShipment={() => setStep(2)}
+          />
+        )}
 
-        <div className="quote-actions">
+        <div className="mt-6 flex flex-wrap gap-3">
           {step > 1 && (
-            <button type="button" className="btn btn-muted" onClick={previousStep}>
-              Back
-            </button>
+            <Button type="button" variant="muted" onClick={previousStep}>Back</Button>
           )}
 
           {step < 3 && (
-            <button type="button" className="btn btn-primary" onClick={nextStep} disabled={!currentStepValid}>
-              Next
-            </button>
+            <Button type="button" onClick={nextStep} disabled={!currentStepValid}>Next</Button>
           )}
 
           {step === 3 && (
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit Quote Request'}
-            </button>
+            </Button>
           )}
         </div>
       </form>
