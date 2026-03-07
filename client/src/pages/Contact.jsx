@@ -99,11 +99,11 @@ function Contact() {
           <div>
             <h3 className="text-base font-semibold text-slate-900">Operating Cities</h3>
             <ul className="mt-2 space-y-1 text-slate-600">
-              <li>• Lagos</li>
-              <li>• Abuja</li>
-              <li>• Port Harcourt</li>
-              <li>• Ibadan</li>
-              <li>• Kano</li>
+              <li>- Lagos</li>
+              <li>- Abuja</li>
+              <li>- Port Harcourt</li>
+              <li>- Ibadan</li>
+              <li>- Kano</li>
             </ul>
           </div>
           <div className="h-32 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3 text-sm text-slate-500">
@@ -112,56 +112,56 @@ function Contact() {
         </article>
 
         <section className="quote-form-wrapper card rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        {toast && (
-          <div className={`toast toast-${toast.type} mb-4`} role="status" aria-live="polite">
-            {toast.message}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <input type="text" className="hp-field" tabIndex="-1" autoComplete="off" {...register('website')} />
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="full_name">Full Name</label>
-              <input className="rounded-lg border border-slate-300 px-3 py-2" id="full_name" type="text" {...register('full_name')} />
-              {errors.full_name && <p className="form-error">{errors.full_name.message}</p>}
+          {toast && (
+            <div className={`toast toast-${toast.type} mb-4`} role="status" aria-live="polite">
+              {toast.message}
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="email">Email</label>
-              <input className="rounded-lg border border-slate-300 px-3 py-2" id="email" type="email" {...register('email')} />
-              {errors.email && <p className="form-error">{errors.email.message}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label htmlFor="subject">Subject</label>
-              <input className="rounded-lg border border-slate-300 px-3 py-2" id="subject" type="text" {...register('subject')} />
-              {errors.subject && <p className="form-error">{errors.subject.message}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label htmlFor="message">Message</label>
-              <textarea className="rounded-lg border border-slate-300 px-3 py-2" id="message" rows="6" {...register('message')} />
-              {errors.message && <p className="form-error">{errors.message.message}</p>}
-            </div>
-          </div>
-
-          <div className="mt-5">
-            <button type="submit" className="inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700" disabled={isSubmitting}>
-              {isSubmitting ? 'Sending...' : 'Send Message'}
-            </button>
-          </div>
-
-          {!isSubmitting && submitState === 'success' && (
-            <p className="form-success">Your message has been submitted successfully.</p>
           )}
 
-          {!isSubmitting && submitState === 'error' && (
-            <p className="form-error">Your message could not be sent. Please try again.</p>
-          )}
-        </form>
-      </section>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <input type="text" className="hp-field" tabIndex="-1" autoComplete="off" {...register('website')} />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="full_name">Full Name</label>
+                <input className="rounded-lg border border-slate-300 px-3 py-2" id="full_name" type="text" {...register('full_name')} />
+                {errors.full_name && <p className="form-error">{errors.full_name.message}</p>}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="email">Email</label>
+                <input className="rounded-lg border border-slate-300 px-3 py-2" id="email" type="email" {...register('email')} />
+                {errors.email && <p className="form-error">{errors.email.message}</p>}
+              </div>
+
+              <div className="flex flex-col gap-1.5 sm:col-span-2">
+                <label htmlFor="subject">Subject</label>
+                <input className="rounded-lg border border-slate-300 px-3 py-2" id="subject" type="text" {...register('subject')} />
+                {errors.subject && <p className="form-error">{errors.subject.message}</p>}
+              </div>
+
+              <div className="flex flex-col gap-1.5 sm:col-span-2">
+                <label htmlFor="message">Message</label>
+                <textarea className="rounded-lg border border-slate-300 px-3 py-2" id="message" rows="6" {...register('message')} />
+                {errors.message && <p className="form-error">{errors.message.message}</p>}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <button type="submit" className="inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700" disabled={isSubmitting}>
+                {isSubmitting ? 'Sending...' : 'Send Message'}
+              </button>
+            </div>
+
+            {!isSubmitting && submitState === 'success' && (
+              <p className="form-success">Your message has been submitted successfully.</p>
+            )}
+
+            {!isSubmitting && submitState === 'error' && (
+              <p className="form-error">Your message could not be sent. Please try again.</p>
+            )}
+          </form>
+        </section>
       </div>
     </section>
   )

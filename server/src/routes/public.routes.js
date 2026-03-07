@@ -100,65 +100,6 @@ router.get('/blog/:slug', async (req, res, next) => {
   }
 })
 
-router.get('/debug/blog', async (req, res, next) => {
-  try {
-    if (process.env.NODE_ENV === 'production') {
-      return fail(res, 'NOT_FOUND', 'Route not found.', 404)
-    }
-
-    await ensureBlogColumns()
-
-    const rows = await db.all(
-      `SELECT *
-       FROM blog_posts
-       ORDER BY datetime(created_at) DESC, id DESC
-       LIMIT 20`,
-    )
-
-    return ok(res, rows, { count: rows.length })
-  } catch (err) {
-    next(err)
-  }
-})
-
-router.get('/debug/quotes', async (req, res, next) => {
-  try {
-    if (process.env.NODE_ENV === 'production') {
-      return fail(res, 'NOT_FOUND', 'Route not found.', 404)
-    }
-
-    const rows = await db.all(
-      `SELECT *
-       FROM quotes
-       ORDER BY datetime(created_at) DESC, id DESC
-       LIMIT 20`,
-    )
-
-    return ok(res, rows, { count: rows.length })
-  } catch (err) {
-    next(err)
-  }
-})
-
-router.get('/debug/messages', async (req, res, next) => {
-  try {
-    if (process.env.NODE_ENV === 'production') {
-      return fail(res, 'NOT_FOUND', 'Route not found.', 404)
-    }
-
-    const rows = await db.all(
-      `SELECT *
-       FROM messages
-       ORDER BY created_at DESC
-       LIMIT 20`,
-    )
-
-    return ok(res, rows)
-  } catch (err) {
-    next(err)
-  }
-})
-
 router.post('/quotes', quoteRateLimit, upload.single('attachment'), async (req, res, next) => {
   try {
     if (req.body.website && String(req.body.website).trim() !== '') {

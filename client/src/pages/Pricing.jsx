@@ -43,7 +43,7 @@ function Pricing() {
             <ul className="mt-4 space-y-2 text-slate-600">
               {tier.bullets.map((bullet) => (
                 <li key={bullet} className="flex items-start gap-2">
-                  <span className="text-green-600">✓</span>
+                  <span className="text-green-600">+</span>
                   <span>{bullet}</span>
                 </li>
               ))}

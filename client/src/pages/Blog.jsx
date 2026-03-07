@@ -69,7 +69,7 @@ function Blog() {
                   <h2 className="mt-3 text-2xl font-semibold text-slate-900">{post.title}</h2>
                   <p className="mt-2 text-slate-600">{post.excerpt || 'No excerpt available yet.'}</p>
                   <Link className="mt-4 inline-flex items-center text-sm font-semibold text-blue-700 hover:text-blue-800" to={`/blog/${post.slug}`}>
-                    Read post →
+                    Read post {'->'}
                   </Link>
                 </Card>
               ))}
@@ -82,7 +82,7 @@ function Blog() {
             <h3 className="text-lg font-semibold text-slate-900">Popular Topics</h3>
             <ul className="mt-3 space-y-2 text-slate-600">
               {popularTopics.map((topic) => (
-                <li key={topic}>• {topic}</li>
+                <li key={topic}>- {topic}</li>
               ))}
             </ul>
           </Card>

@@ -9,7 +9,7 @@ const quoteRateLimit = rateLimit({
     ok: false,
     error: {
       code: 'RATE_LIMITED',
-      message: 'Too many quote requests from this IP. Please try again later.',
+      message: 'Too many requests from this IP. Please try again later.',
     },
   },
 })

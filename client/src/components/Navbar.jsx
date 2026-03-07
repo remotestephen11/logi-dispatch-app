@@ -14,7 +14,7 @@ function Navbar() {
     <header className="sticky top-0 z-40 border-b border-slate-200/90 bg-white/70 backdrop-blur-lg">
       <Container className="flex flex-wrap items-center justify-between gap-3 py-3">
         <NavLink to="/" className="inline-flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs text-white">⚡</span>
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">LD</span>
           <span>LogiDispatch</span>
         </NavLink>
         <nav aria-label="Primary" className="flex flex-wrap items-center gap-0.5">

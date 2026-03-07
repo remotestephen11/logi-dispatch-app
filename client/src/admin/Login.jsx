@@ -1,7 +1,6 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
-import { API_BASE_URL } from '../api/http'
 
 function Login() {
   const navigate = useNavigate()
@@ -10,18 +9,12 @@ function Login() {
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
-  const hasLoggedUrl = useRef(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setLoading(true)
     setToast(null)
     setErrorMessage('')
-
-    if (!hasLoggedUrl.current) {
-      console.log(`Admin login URL: ${API_BASE_URL}/api/auth/login`)
-      hasLoggedUrl.current = true
-    }
 
     try {
       await login(email, password)
