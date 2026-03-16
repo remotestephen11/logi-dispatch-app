@@ -1,8 +1,11 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+require('dotenv').config();
 
-const dbPath = path.resolve(__dirname, 'app.sqlite');
+const dbPath = process.env.DB_PATH
+  ? path.resolve(process.env.DB_PATH)
+  : path.resolve(__dirname, 'app.sqlite');
 const schemaPath = path.resolve(__dirname, 'schema.sql');
 
 const schemaSql = fs.readFileSync(schemaPath, 'utf8');

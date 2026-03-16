@@ -23,6 +23,15 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/', (req, res) => {
+  res.json({
+    ok: true,
+    message: 'LogiDispatch API is running',
+    health: '/api/health',
+    blog: '/api/blog',
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, data: { status: 'up' }, meta: {} });
 });
