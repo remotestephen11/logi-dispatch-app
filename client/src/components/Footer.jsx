@@ -30,6 +30,9 @@ function Footer() {
         <div>
           <h3 className="mb-2 text-base font-semibold text-white">Company</h3>
           <p>Built for dependable shipment coordination and transparent customer updates.</p>
+          <p className="mt-2">
+            <Link className="text-xs text-slate-400 hover:text-slate-600" to="/admin/login">Admin</Link>
+          </p>
           <p className="mt-2 text-slate-400">Copyright {new Date().getFullYear()} LogiDispatch.</p>
         </div>
       </Container>
