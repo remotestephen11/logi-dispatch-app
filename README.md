@@ -97,7 +97,7 @@ npm run db:admin
 
 ### Backend (Render)
 - Root directory: `server`
-- Build command: `npm install`
+- Build command: `npm install && npm run db:migrate && npm run db:seed`
 - Start command: `npm run start`
 - Configure env vars: `PORT`, `JWT_SECRET`, `CORS_ORIGIN`, `DB_PATH` (optional)
 - Ensure a persistent disk/path is used for SQLite in production.
