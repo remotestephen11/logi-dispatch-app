@@ -16,17 +16,21 @@ router.post('/login', async (req, res, next) => {
     }
 
     const { email, password } = parsed.data
+    console.log(`[auth] login attempt email=${email}`)
 
     const user = await db.get(
       'SELECT id, email, role, password_hash FROM users WHERE email = ? LIMIT 1',
       [email],
     )
 
+    console.log(`[auth] user found=${Boolean(user)} email=${email}`)
+
     if (!user) {
       return fail(res, 'INVALID_CREDENTIALS', 'Invalid email or password', 401)
     }
 
     const passwordMatches = await bcrypt.compare(password, user.password_hash)
+    console.log(`[auth] password matched=${passwordMatches} email=${email}`)
 
     if (!passwordMatches) {
       return fail(res, 'INVALID_CREDENTIALS', 'Invalid email or password', 401)

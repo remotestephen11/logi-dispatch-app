@@ -8,6 +8,8 @@ const publicRoutes = require('./routes/public.routes');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const errorHandler = require('./middleware/errorHandler');
+const db = require('./config/db');
+const { seedAdmin } = require('./db/adminSeed');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,6 +51,18 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    console.log(`[startup] resolved DB path: ${db.dbPath}`);
+    const adminSeedResult = await seedAdmin();
+    console.log(`[startup] admin user ${adminSeedResult}`);
+    app.listen(PORT, () => {
+      console.log(`Server listening on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to initialize admin user:', err.message);
+    process.exit(1);
+  }
+}
+
+startServer();

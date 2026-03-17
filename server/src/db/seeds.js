@@ -1,53 +1,7 @@
-const path = require('path')
-const sqlite3 = require('sqlite3').verbose()
-require('dotenv').config()
-
-const dbPath = process.env.DB_PATH
-  ? path.resolve(process.env.DB_PATH)
-  : path.resolve(__dirname, 'app.sqlite')
-const db = new sqlite3.Database(dbPath)
-
-function run(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function onRun(err) {
-      if (err) {
-        reject(err)
-        return
-      }
-
-      resolve({ lastID: this.lastID, changes: this.changes })
-    })
-  })
-}
-
-function get(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) {
-        reject(err)
-        return
-      }
-
-      resolve(row)
-    })
-  })
-}
-
-function closeDb() {
-  return new Promise((resolve, reject) => {
-    db.close((err) => {
-      if (err) {
-        reject(err)
-        return
-      }
-
-      resolve()
-    })
-  })
-}
+const db = require('../config/db')
 
 async function ensureBlogSchema() {
-  await run(
+  await db.run(
     `CREATE TABLE IF NOT EXISTS blog_posts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       author_id INTEGER,
@@ -61,26 +15,18 @@ async function ensureBlogSchema() {
     )`,
   )
 
-  const columns = await new Promise((resolve, reject) => {
-    db.all('PRAGMA table_info(blog_posts)', (err, rows) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      resolve(rows)
-    })
-  })
+  const columns = await db.all('PRAGMA table_info(blog_posts)')
 
   const hasCoverImage = columns.some((column) => column.name === 'cover_image_url')
   if (!hasCoverImage) {
-    await run('ALTER TABLE blog_posts ADD COLUMN cover_image_url TEXT')
+    await db.run('ALTER TABLE blog_posts ADD COLUMN cover_image_url TEXT')
   }
 }
 
 async function seedBlogPosts() {
   await ensureBlogSchema()
 
-  const countRow = await get('SELECT COUNT(*) AS count FROM blog_posts')
+  const countRow = await db.get('SELECT COUNT(*) AS count FROM blog_posts')
   if (countRow.count > 0) {
     console.log('Seed skipped: blog_posts table already contains records.')
     return
@@ -138,7 +84,7 @@ async function seedBlogPosts() {
   ]
 
   for (const post of samplePosts) {
-    await run(
+    await db.run(
       `INSERT INTO blog_posts (title, slug, excerpt, content, published, cover_image_url)
        VALUES (?, ?, ?, ?, 1, ?)`,
       [post.title, post.slug, post.excerpt, post.content, post.cover_image_url || null],
@@ -149,12 +95,12 @@ async function seedBlogPosts() {
 }
 
 seedBlogPosts()
-  .then(() => closeDb())
+  .then(() => db.close())
   .then(() => process.exit(0))
   .catch(async (err) => {
     console.error('Seeding failed:', err.message)
     try {
-      await closeDb()
+      await db.close()
     } catch (closeErr) {
       console.error('Failed to close database:', closeErr.message)
     }
