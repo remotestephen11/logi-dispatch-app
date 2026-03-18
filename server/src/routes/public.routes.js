@@ -157,7 +157,7 @@ router.post('/quotes', quoteRateLimit, upload.single('attachment'), async (req, 
         payload.weight_kg ?? null,
         payload.value_amount ?? null,
         attachmentPath,
-        'new',
+        'pending',
       ],
     )
 

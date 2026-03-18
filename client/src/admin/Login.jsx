@@ -1,14 +1,19 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { login } from '../api/auth'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { getToken, login } from '../api/auth'
 
 function Login() {
   const navigate = useNavigate()
+  const token = getToken()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
+
+  if (token) {
+    return <Navigate to="/admin/dashboard" replace />
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -29,40 +34,45 @@ function Login() {
   }
 
   return (
-    <section className="page">
-      <h1>Admin Login</h1>
-      <section className="quote-form-wrapper card">
-        {toast && <div className={`toast toast-${toast.type}`}>{toast.message}</div>}
+    <main className="admin-app-shell">
+      <section className="card" style={{ maxWidth: '520px', width: '100%', margin: '0 auto', alignSelf: 'center' }}>
+        <p className="admin-kicker">Secure Access</p>
+        <h1>Admin Login</h1>
+        <p className="admin-page-copy">Sign in to manage the dashboard, blog, and quotes.</p>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-field form-field-full">
-              <label htmlFor="admin-email">Email</label>
-              <input id="admin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <section className="quote-form-wrapper">
+          {toast && <div className={`toast toast-${toast.type}`}>{toast.message}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid">
+              <div className="form-field form-field-full">
+                <label htmlFor="admin-email">Email</label>
+                <input id="admin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+
+              <div className="form-field form-field-full">
+                <label htmlFor="admin-password">Password</label>
+                <input
+                  id="admin-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="form-field form-field-full">
-              <label htmlFor="admin-password">Password</label>
-              <input
-                id="admin-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <div className="quote-actions">
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? 'Signing in...' : 'Sign In'}
+              </button>
             </div>
-          </div>
 
-          <div className="quote-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </div>
-
-          {errorMessage && <p className="form-error">{errorMessage}</p>}
-        </form>
+            {errorMessage && <p className="form-error">{errorMessage}</p>}
+          </form>
+        </section>
       </section>
-    </section>
+    </main>
   )
 }
 

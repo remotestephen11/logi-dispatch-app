@@ -2,11 +2,8 @@ const express = require('express')
 const db = require('../config/db')
 const auth = require('../middleware/auth')
 const { ok, fail } = require('../utils/responses')
-const {
-  statusSchema,
-  blogCreateSchema,
-  blogUpdateSchema,
-} = require('../validators/blog.schema')
+const { blogCreateSchema, blogUpdateSchema } = require('../validators/blog.schema')
+const { quoteStatusSchema } = require('../validators/quote.schema')
 
 const router = express.Router()
 
@@ -16,6 +13,25 @@ async function ensureBlogColumns() {
 
   if (!existing.has('cover_image_url')) {
     await db.run('ALTER TABLE blog_posts ADD COLUMN cover_image_url TEXT')
+  }
+}
+
+function normalizeQuoteStatus(status) {
+  if (status === 'new') {
+    return 'pending'
+  }
+
+  if (status === 'in_progress') {
+    return 'contacted'
+  }
+
+  return status || 'pending'
+}
+
+function mapQuote(row) {
+  return {
+    ...row,
+    status: normalizeQuoteStatus(row.status),
   }
 }
 
@@ -30,15 +46,58 @@ function requireAdmin(req, res, next) {
 router.use(auth)
 router.use(requireAdmin)
 
+router.get('/summary', async (req, res, next) => {
+  try {
+    await ensureBlogColumns()
+
+    const [blogRow, quoteRow, pendingRow] = await Promise.all([
+      db.get('SELECT COUNT(*) AS count FROM blog_posts'),
+      db.get('SELECT COUNT(*) AS count FROM quotes'),
+      db.get("SELECT COUNT(*) AS count FROM quotes WHERE status IN ('pending', 'new')"),
+    ])
+
+    return ok(
+      res,
+      {
+        totalBlogPosts: blogRow?.count || 0,
+        totalQuotes: quoteRow?.count || 0,
+        pendingQuotes: pendingRow?.count || 0,
+      },
+      {},
+    )
+  } catch (err) {
+    next(err)
+  }
+})
+
 router.get('/quotes', async (req, res, next) => {
   try {
     const rows = await db.all(
       `SELECT *
        FROM quotes
        ORDER BY datetime(created_at) DESC, id DESC
-       LIMIT 100`,
+       LIMIT 200`,
     )
-    return ok(res, rows, { count: rows.length })
+
+    return ok(res, rows.map(mapQuote), { count: rows.length })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/quotes/:id', async (req, res, next) => {
+  try {
+    const quoteId = Number(req.params.id)
+    if (!Number.isInteger(quoteId) || quoteId <= 0) {
+      return fail(res, 'VALIDATION_ERROR', 'Invalid quote id', 400)
+    }
+
+    const row = await db.get('SELECT * FROM quotes WHERE id = ?', [quoteId])
+    if (!row) {
+      return fail(res, 'NOT_FOUND', 'Quote not found', 404)
+    }
+
+    return ok(res, mapQuote(row), {})
   } catch (err) {
     next(err)
   }
@@ -46,7 +105,7 @@ router.get('/quotes', async (req, res, next) => {
 
 router.patch('/quotes/:id/status', async (req, res, next) => {
   try {
-    const parsed = statusSchema.safeParse(req.body)
+    const parsed = quoteStatusSchema.safeParse(req.body)
     if (!parsed.success) {
       return fail(res, 'VALIDATION_ERROR', 'Invalid status value', 400)
     }
@@ -62,45 +121,7 @@ router.patch('/quotes/:id/status', async (req, res, next) => {
     }
 
     const row = await db.get('SELECT * FROM quotes WHERE id = ?', [quoteId])
-    return ok(res, row, {})
-  } catch (err) {
-    next(err)
-  }
-})
-
-router.get('/messages', async (req, res, next) => {
-  try {
-    const rows = await db.all(
-      `SELECT *
-       FROM messages
-       ORDER BY datetime(created_at) DESC, id DESC
-       LIMIT 100`,
-    )
-    return ok(res, rows, { count: rows.length })
-  } catch (err) {
-    next(err)
-  }
-})
-
-router.patch('/messages/:id/status', async (req, res, next) => {
-  try {
-    const parsed = statusSchema.safeParse(req.body)
-    if (!parsed.success) {
-      return fail(res, 'VALIDATION_ERROR', 'Invalid status value', 400)
-    }
-
-    const messageId = Number(req.params.id)
-    if (!Number.isInteger(messageId) || messageId <= 0) {
-      return fail(res, 'VALIDATION_ERROR', 'Invalid message id', 400)
-    }
-
-    const result = await db.run('UPDATE messages SET status = ? WHERE id = ?', [parsed.data.status, messageId])
-    if (result.changes === 0) {
-      return fail(res, 'NOT_FOUND', 'Message not found', 404)
-    }
-
-    const row = await db.get('SELECT * FROM messages WHERE id = ?', [messageId])
-    return ok(res, row, {})
+    return ok(res, mapQuote(row), {})
   } catch (err) {
     next(err)
   }
@@ -109,11 +130,13 @@ router.patch('/messages/:id/status', async (req, res, next) => {
 router.get('/blog', async (req, res, next) => {
   try {
     await ensureBlogColumns()
+
     const rows = await db.all(
       `SELECT id, title, slug, excerpt, content, published, cover_image_url, created_at
        FROM blog_posts
        ORDER BY datetime(created_at) DESC, id DESC`,
     )
+
     return ok(res, rows, { count: rows.length })
   } catch (err) {
     next(err)
@@ -123,6 +146,7 @@ router.get('/blog', async (req, res, next) => {
 router.post('/blog', async (req, res, next) => {
   try {
     await ensureBlogColumns()
+
     const parsed = blogCreateSchema.safeParse(req.body)
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0]
@@ -149,11 +173,13 @@ router.post('/blog', async (req, res, next) => {
        WHERE id = ?`,
       [insert.lastID],
     )
+
     return ok(res, row, {})
   } catch (err) {
     if (err && err.code === 'SQLITE_CONSTRAINT') {
       return fail(res, 'CONFLICT', 'Slug already exists', 409)
     }
+
     next(err)
   }
 })
@@ -161,6 +187,7 @@ router.post('/blog', async (req, res, next) => {
 router.put('/blog/:id', async (req, res, next) => {
   try {
     await ensureBlogColumns()
+
     const parsed = blogUpdateSchema.safeParse(req.body)
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0]
@@ -215,6 +242,7 @@ router.put('/blog/:id', async (req, res, next) => {
     if (err && err.code === 'SQLITE_CONSTRAINT') {
       return fail(res, 'CONFLICT', 'Slug already exists', 409)
     }
+
     next(err)
   }
 })

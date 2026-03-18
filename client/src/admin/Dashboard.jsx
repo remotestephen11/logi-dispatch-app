@@ -1,34 +1,43 @@
-import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { fetchMessages, fetchQuotes } from '../api/admin'
+import { Link } from 'react-router-dom'
+import { fetchAdminSummary } from '../api/admin'
+
+const emptySummary = {
+  totalBlogPosts: 0,
+  totalQuotes: 0,
+  pendingQuotes: 0,
+}
+
+const summaryCards = [
+  { key: 'totalBlogPosts', label: 'Total Blog Posts' },
+  { key: 'totalQuotes', label: 'Total Quotes' },
+  { key: 'pendingQuotes', label: 'Pending Quotes' },
+]
 
 function Dashboard() {
+  const [summary, setSummary] = useState(emptySummary)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [kpi, setKpi] = useState({ totalQuotes: 0, newQuotes: 0, totalMessages: 0, newMessages: 0 })
 
   useEffect(() => {
     let isMounted = true
 
-    const loadData = async () => {
+    const loadSummary = async () => {
       try {
         setLoading(true)
         setError('')
-        const [quotes, messages] = await Promise.all([fetchQuotes(), fetchMessages()])
+        const data = await fetchAdminSummary()
 
-        if (!isMounted) {
-          return
+        if (isMounted) {
+          setSummary({
+            totalBlogPosts: data.totalBlogPosts || 0,
+            totalQuotes: data.totalQuotes || 0,
+            pendingQuotes: data.pendingQuotes || 0,
+          })
         }
-
-        setKpi({
-          totalQuotes: quotes.length,
-          newQuotes: quotes.filter((q) => q.status === 'new').length,
-          totalMessages: messages.length,
-          newMessages: messages.filter((m) => m.status === 'new').length,
-        })
       } catch (err) {
         if (isMounted) {
-          setError(err.message || 'Failed to load dashboard metrics')
+          setError(err.message || 'Failed to load admin summary')
         }
       } finally {
         if (isMounted) {
@@ -37,31 +46,46 @@ function Dashboard() {
       }
     }
 
-    loadData()
+    loadSummary()
+
     return () => {
       isMounted = false
     }
   }, [])
 
   return (
-    <section className="page">
-      <h1>Admin Dashboard</h1>
+    <section className="admin-page">
+      <div className="admin-page-header">
+        <div>
+          <p className="admin-kicker">Overview</p>
+          <h2>Dashboard</h2>
+          <p className="admin-page-copy">A quick read on publishing activity and incoming quote demand.</p>
+        </div>
+      </div>
 
-      {loading && <p>Loading metrics...</p>}
+      {loading && <p>Loading dashboard summary...</p>}
       {!loading && error && <p className="form-error">{error}</p>}
+
       {!loading && !error && (
         <>
-          <div className="card-grid">
-            <article className="card"><h2>Total Quotes</h2><p>{kpi.totalQuotes}</p></article>
-            <article className="card"><h2>New Quotes</h2><p>{kpi.newQuotes}</p></article>
-            <article className="card"><h2>Total Messages</h2><p>{kpi.totalMessages}</p></article>
-            <article className="card"><h2>New Messages</h2><p>{kpi.newMessages}</p></article>
+          <div className="admin-summary-grid">
+            {summaryCards.map((card) => (
+              <article key={card.key} className="card admin-summary-card">
+                <p className="admin-summary-label">{card.label}</p>
+                <p className="admin-summary-value">{summary[card.key]}</p>
+              </article>
+            ))}
           </div>
 
-          <div className="card-grid">
-            <Link className="card" to="/admin/quotes"><h2>Quotes</h2><p>Manage quote requests</p></Link>
-            <Link className="card" to="/admin/messages"><h2>Messages</h2><p>Manage contact messages</p></Link>
-            <Link className="card" to="/admin/blog"><h2>Blog</h2><p>Create and edit blog posts</p></Link>
+          <div className="admin-shortcuts-grid">
+            <Link className="card admin-shortcut-card" to="/admin/blog">
+              <h3>Manage Blog</h3>
+              <p>Create, review, and update blog posts.</p>
+            </Link>
+            <Link className="card admin-shortcut-card" to="/admin/quotes">
+              <h3>Manage Quotes</h3>
+              <p>Track submissions and move each request through the pipeline.</p>
+            </Link>
           </div>
         </>
       )}

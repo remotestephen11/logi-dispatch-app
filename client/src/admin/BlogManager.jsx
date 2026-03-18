@@ -6,29 +6,31 @@ const emptyForm = {
   slug: '',
   excerpt: '',
   content: '',
+  cover_image_url: '',
   published: true,
+}
+
+function formatDate(value) {
+  if (!value) {
+    return 'Recent'
+  }
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return date.toLocaleDateString()
 }
 
 function BlogManager() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [toast, setToast] = useState(null)
-  const [form, setForm] = useState(emptyForm)
-  const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    if (!toast) {
-      return undefined
-    }
-
-    const timer = setTimeout(() => {
-      setToast(null)
-    }, 3000)
-
-    return () => clearTimeout(timer)
-  }, [toast])
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState(null)
+  const [editingId, setEditingId] = useState(null)
+  const [form, setForm] = useState(emptyForm)
 
   useEffect(() => {
     let isMounted = true
@@ -38,8 +40,9 @@ function BlogManager() {
         setLoading(true)
         setError('')
         const data = await fetchAdminBlog()
+
         if (isMounted) {
-          setPosts(data)
+          setPosts(Array.isArray(data) ? data : [])
         }
       } catch (err) {
         if (isMounted) {
@@ -59,161 +62,240 @@ function BlogManager() {
     }
   }, [])
 
-  const onFormChange = (key, value) => {
-    setForm((current) => ({ ...current, [key]: value }))
-  }
+  useEffect(() => {
+    if (!notice) {
+      return undefined
+    }
 
-  const startEdit = (post) => {
-    setEditingId(post.id)
-    setForm({
-      title: post.title || '',
-      slug: post.slug || '',
-      excerpt: post.excerpt || '',
-      content: post.content || '',
-      published: Number(post.published) === 1,
-    })
+    const timer = window.setTimeout(() => {
+      setNotice(null)
+    }, 3000)
+
+    return () => window.clearTimeout(timer)
+  }, [notice])
+
+  const setField = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
   }
 
   const resetForm = () => {
     setEditingId(null)
     setForm(emptyForm)
+    setError('')
   }
 
-  const submitForm = async (event) => {
-    event.preventDefault()
+  const startEdit = (post) => {
+    setEditingId(post.id)
     setError('')
+    setForm({
+      title: post.title || '',
+      slug: post.slug || '',
+      excerpt: post.excerpt || '',
+      content: post.content || '',
+      cover_image_url: post.cover_image_url || '',
+      published: Number(post.published) === 1,
+    })
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
     setSaving(true)
+    setError('')
 
     const payload = {
-      title: form.title,
-      slug: form.slug,
-      excerpt: form.excerpt,
-      content: form.content,
+      title: form.title.trim(),
+      slug: form.slug.trim(),
+      excerpt: form.excerpt.trim(),
+      content: form.content.trim(),
+      cover_image_url: form.cover_image_url.trim(),
       published: form.published ? 1 : 0,
     }
 
     try {
       if (editingId) {
         const updated = await updateBlogPost(editingId, payload)
-        setPosts((items) => items.map((item) => (item.id === editingId ? updated : item)))
-        setToast({ type: 'success', message: 'Post updated.' })
+        setPosts((current) => current.map((post) => (post.id === editingId ? updated : post)))
+        setNotice({ type: 'success', message: 'Blog post updated.' })
       } else {
         const created = await createBlogPost(payload)
-        setPosts((items) => [created, ...items])
-        setToast({ type: 'success', message: 'Post created.' })
+        setPosts((current) => [created, ...current])
+        setNotice({ type: 'success', message: 'Blog post created.' })
       }
 
       resetForm()
     } catch (err) {
-      const message = err.message || 'Unable to save post'
+      const message = err.message || 'Unable to save blog post'
       setError(message)
-      setToast({ type: 'error', message })
+      setNotice({ type: 'error', message })
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm('Delete this post?')
-    if (!confirmed) {
+    if (!window.confirm('Delete this blog post?')) {
       return
     }
 
+    setError('')
+
     try {
       await deleteBlogPost(id)
-      setPosts((items) => items.filter((item) => item.id !== id))
-      setToast({ type: 'success', message: 'Post deleted.' })
+      setPosts((current) => current.filter((post) => post.id !== id))
+      setNotice({ type: 'success', message: 'Blog post deleted.' })
+
       if (editingId === id) {
         resetForm()
       }
     } catch (err) {
-      const message = err.message || 'Failed to delete post'
+      const message = err.message || 'Failed to delete blog post'
       setError(message)
-      setToast({ type: 'error', message })
+      setNotice({ type: 'error', message })
     }
   }
 
   return (
-    <section className="page">
-      <h1>Blog Manager</h1>
-      {toast && <div className={`toast toast-${toast.type}`}>{toast.message}</div>}
-      {loading && <p>Loading blog posts...</p>}
-      {!loading && error && <p className="form-error">{error}</p>}
+    <section className="admin-page">
+      <div className="admin-page-header">
+        <div>
+          <p className="admin-kicker">Content</p>
+          <h2>Blog Management</h2>
+          <p className="admin-page-copy">Create and maintain published and draft posts from one screen.</p>
+        </div>
+      </div>
 
-      {!loading && (
-        <>
-          <section className="card" style={{ marginBottom: '1rem' }}>
-            <h2>{editingId ? 'Edit Post' : 'Create Post'}</h2>
-            <form onSubmit={submitForm}>
-              <div className="form-grid">
-                <div className="form-field form-field-full">
-                  <label htmlFor="blog-title">Title</label>
-                  <input id="blog-title" value={form.title} onChange={(e) => onFormChange('title', e.target.value)} required />
-                </div>
+      {notice && <div className={`toast toast-${notice.type}`}>{notice.message}</div>}
+      {error && <p className="form-error">{error}</p>}
 
-                <div className="form-field form-field-full">
-                  <label htmlFor="blog-slug">Slug</label>
-                  <input id="blog-slug" value={form.slug} onChange={(e) => onFormChange('slug', e.target.value)} required />
-                </div>
+      <div className="admin-section-grid">
+        <section className="card">
+          <div className="admin-section-heading">
+            <div>
+              <h3>{editingId ? 'Edit Post' : 'Create Post'}</h3>
+              <p className="admin-section-copy">Use a clear title, stable slug, and publish only when ready.</p>
+            </div>
+          </div>
 
-                <div className="form-field form-field-full">
-                  <label htmlFor="blog-excerpt">Excerpt</label>
-                  <textarea id="blog-excerpt" rows="3" value={form.excerpt} onChange={(e) => onFormChange('excerpt', e.target.value)} />
-                </div>
-
-                <div className="form-field form-field-full">
-                  <label htmlFor="blog-content">Content</label>
-                  <textarea id="blog-content" rows="6" value={form.content} onChange={(e) => onFormChange('content', e.target.value)} required />
-                </div>
-
-                <div className="form-field form-field-full">
-                  <label htmlFor="blog-published">
-                    <input
-                      id="blog-published"
-                      type="checkbox"
-                      checked={form.published}
-                      onChange={(e) => onFormChange('published', e.target.checked)}
-                    />{' '}
-                    Published
-                  </label>
-                </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid">
+              <div className="form-field form-field-full">
+                <label htmlFor="blog-title">Title</label>
+                <input
+                  id="blog-title"
+                  value={form.title}
+                  onChange={(event) => setField('title', event.target.value)}
+                  required
+                />
               </div>
 
-              <div className="quote-actions">
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? 'Saving...' : editingId ? 'Update Post' : 'Create Post'}
+              <div className="form-field form-field-full">
+                <label htmlFor="blog-slug">Slug</label>
+                <input
+                  id="blog-slug"
+                  value={form.slug}
+                  onChange={(event) => setField('slug', event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-field form-field-full">
+                <label htmlFor="blog-excerpt">Excerpt</label>
+                <textarea
+                  id="blog-excerpt"
+                  rows="3"
+                  value={form.excerpt}
+                  onChange={(event) => setField('excerpt', event.target.value)}
+                />
+              </div>
+
+              <div className="form-field form-field-full">
+                <label htmlFor="blog-cover-image">Cover Image URL</label>
+                <input
+                  id="blog-cover-image"
+                  value={form.cover_image_url}
+                  onChange={(event) => setField('cover_image_url', event.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              <div className="form-field form-field-full">
+                <label htmlFor="blog-content">Content</label>
+                <textarea
+                  id="blog-content"
+                  rows="10"
+                  value={form.content}
+                  onChange={(event) => setField('content', event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-field form-field-full admin-checkbox-field">
+                <label htmlFor="blog-published" className="admin-checkbox-label">
+                  <input
+                    id="blog-published"
+                    type="checkbox"
+                    checked={form.published}
+                    onChange={(event) => setField('published', event.target.checked)}
+                  />
+                  Publish immediately
+                </label>
+              </div>
+            </div>
+
+            <div className="quote-actions">
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? 'Saving...' : editingId ? 'Update Post' : 'Create Post'}
+              </button>
+              {editingId && (
+                <button type="button" className="btn btn-muted" onClick={resetForm}>
+                  Cancel Edit
                 </button>
-                {editingId && <button type="button" className="btn btn-muted" onClick={resetForm}>Cancel Edit</button>}
-              </div>
-            </form>
-          </section>
+              )}
+            </div>
+          </form>
+        </section>
 
-          {!error && posts.length === 0 && <p>No blog posts found.</p>}
-          {posts.length > 0 && (
-            <div style={{ overflowX: 'auto' }}>
+        <section className="card">
+          <div className="admin-section-heading">
+            <div>
+              <h3>Posts</h3>
+              <p className="admin-section-copy">Review all posts and jump into editing from the list.</p>
+            </div>
+          </div>
+
+          {loading && <p>Loading blog posts...</p>}
+          {!loading && posts.length === 0 && <p>No blog posts found.</p>}
+
+          {!loading && posts.length > 0 && (
+            <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Title</th>
+                    <th>Status</th>
                     <th>Slug</th>
-                    <th>Published</th>
-                    <th>Updated</th>
+                    <th>Created</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {posts.map((post) => (
                     <tr key={post.id}>
-                      <td>{post.id}</td>
                       <td>{post.title}</td>
+                      <td>{Number(post.published) === 1 ? 'Published' : 'Draft'}</td>
                       <td>{post.slug}</td>
-                      <td>{Number(post.published) === 1 ? 'Yes' : 'No'}</td>
-                      <td>{post.updated_at || post.created_at}</td>
+                      <td>{formatDate(post.created_at)}</td>
                       <td>
-                        <div className="quote-actions">
-                          <button type="button" className="btn btn-muted" onClick={() => startEdit(post)}>Edit</button>
-                          <button type="button" className="btn btn-secondary" onClick={() => handleDelete(post.id)}>Delete</button>
+                        <div className="admin-inline-actions">
+                          <button type="button" className="btn btn-muted" onClick={() => startEdit(post)}>
+                            Edit
+                          </button>
+                          <button type="button" className="btn btn-danger" onClick={() => handleDelete(post.id)}>
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -222,8 +304,8 @@ function BlogManager() {
               </table>
             </div>
           )}
-        </>
-      )}
+        </section>
+      </div>
     </section>
   )
 }

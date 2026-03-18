@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './http'
-import { getToken } from './auth'
+import { getToken, logout } from './auth'
 
 function authHeaders() {
   const token = getToken()
@@ -12,9 +12,20 @@ function authHeaders() {
   }
 }
 
-async function request(url, options = {}) {
-  const response = await fetch(url, options)
+async function request(path, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...authHeaders(),
+      ...(options.headers || {}),
+    },
+  })
+
   const payload = await response.json()
+
+  if (response.status === 401) {
+    logout()
+  }
 
   if (!response.ok || !payload.ok) {
     throw new Error(payload?.error?.message || 'Request failed')
@@ -23,79 +34,50 @@ async function request(url, options = {}) {
   return payload.data
 }
 
+export function fetchAdminSummary() {
+  return request('/api/admin/summary')
+}
+
 export function fetchQuotes() {
-  return request(`${API_BASE_URL}/api/admin/quotes`, {
-    headers: {
-      ...authHeaders(),
-    },
-  })
+  return request('/api/admin/quotes')
 }
 
 export function updateQuoteStatus(id, status) {
-  return request(`${API_BASE_URL}/api/admin/quotes/${id}/status`, {
+  return request(`/api/admin/quotes/${id}/status`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(),
-    },
-    body: JSON.stringify({ status }),
-  })
-}
-
-export function fetchMessages() {
-  return request(`${API_BASE_URL}/api/admin/messages`, {
-    headers: {
-      ...authHeaders(),
-    },
-  })
-}
-
-export function updateMessageStatus(id, status) {
-  return request(`${API_BASE_URL}/api/admin/messages/${id}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
     },
     body: JSON.stringify({ status }),
   })
 }
 
 export function fetchAdminBlog() {
-  return request(`${API_BASE_URL}/api/admin/blog`, {
-    headers: {
-      ...authHeaders(),
-    },
-  })
+  return request('/api/admin/blog')
 }
 
 export function createBlogPost(payload) {
-  return request(`${API_BASE_URL}/api/admin/blog`, {
+  return request('/api/admin/blog', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(),
     },
     body: JSON.stringify(payload),
   })
 }
 
 export function updateBlogPost(id, payload) {
-  return request(`${API_BASE_URL}/api/admin/blog/${id}`, {
+  return request(`/api/admin/blog/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(),
     },
     body: JSON.stringify(payload),
   })
 }
 
 export function deleteBlogPost(id) {
-  return request(`${API_BASE_URL}/api/admin/blog/${id}`, {
+  return request(`/api/admin/blog/${id}`, {
     method: 'DELETE',
-    headers: {
-      ...authHeaders(),
-    },
   })
 }

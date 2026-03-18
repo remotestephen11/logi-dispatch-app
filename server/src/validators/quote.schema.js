@@ -39,4 +39,8 @@ const quoteSchema = z.object({
   website: optionalString,
 })
 
-module.exports = { quoteSchema }
+const quoteStatusSchema = z.object({
+  status: z.enum(['pending', 'contacted', 'closed']),
+})
+
+module.exports = { quoteSchema, quoteStatusSchema }
