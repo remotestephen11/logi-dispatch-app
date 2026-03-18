@@ -4,7 +4,7 @@ import { API_BASE_URL } from '../api/http'
 import Button from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 
-const popularTopics = ['Dispatch Safety', 'SLA Management', 'Fleet Efficiency', 'Last-Mile Optimization']
+const popularTopics = ['Dispatch safety', 'Delivery SLA design', 'Route planning', 'Quote response workflow']
 
 function Blog() {
   const [posts, setPosts] = useState([])
@@ -49,18 +49,19 @@ function Blog() {
 
   return (
     <section className="space-y-8 py-12 sm:space-y-10 sm:py-16">
-      <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white sm:p-10">
-        <h1 className="text-3xl font-semibold sm:text-4xl">Logistics Insights</h1>
+      <div className="rounded-3xl bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 p-8 text-white sm:p-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-200">Industry content</p>
+        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Operational content that supports sales, trust, and customer communication.</h1>
         <p className="mt-3 max-w-2xl text-slate-300">
-          Practical dispatch playbooks, safety notes, and delivery strategy updates for operations teams.
+          The blog helps the business explain how it thinks about dispatch reliability, route planning, and logistics execution in a way that feels informed and credible.
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
         <div>
-          {loading && <p>Loading posts...</p>}
+          {loading && <p className="text-slate-600">Loading posts...</p>}
           {!loading && error && <p className="form-error">{error}</p>}
-          {!loading && !error && posts.length === 0 && <p>No published posts yet.</p>}
+          {!loading && !error && posts.length === 0 && <p className="text-slate-600">No published posts yet.</p>}
           {!loading && !error && posts.length > 0 && (
             <div className="grid gap-4">
               {posts.map((post) => (
@@ -87,10 +88,10 @@ function Blog() {
             </ul>
           </Card>
           <Card>
-            <h3 className="text-lg font-semibold text-slate-900">Need a logistics partner?</h3>
-            <p className="mt-2 text-slate-600">Request a custom quote for your dispatch volume and routes.</p>
+            <h3 className="text-lg font-semibold text-slate-900">Need operational support?</h3>
+            <p className="mt-2 text-slate-600">Use the quote workflow to share your route, cargo, and delivery requirements.</p>
             <div className="mt-4">
-              <Button to="/quote">Get a Quote</Button>
+              <Button to="/quote">Request a Quote</Button>
             </div>
           </Card>
         </aside>

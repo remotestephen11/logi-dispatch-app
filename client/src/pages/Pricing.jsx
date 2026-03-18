@@ -3,30 +3,46 @@ import { Card } from '../components/ui/Card'
 
 const pricingTiers = [
   {
-    name: 'Basic',
-    description: 'Best for startups and low-volume weekly deliveries.',
-    bullets: ['Up to 50 deliveries/month', 'Standard dispatch support (business hours)', 'Basic proof-of-delivery updates'],
+    name: 'Starter Operations',
+    description: 'For smaller teams that need a dependable public presence and basic quote handling.',
+    bullets: [
+      'Best for early-stage logistics or dispatch businesses',
+      'Suitable for lower recurring request volume',
+      'Strong fit when the priority is cleaner client intake and presentation',
+    ],
   },
   {
-    name: 'Business',
+    name: 'Growth Operations',
     popular: true,
-    description: 'For growing operations handling city-wide and interstate requests.',
-    bullets: ['Up to 250 deliveries/month', 'Priority dispatch assignment', 'Weekly performance and SLA reporting'],
+    description: 'For businesses that need a stronger workflow around incoming demand, service communication, and admin follow-up.',
+    bullets: [
+      'Best for growing dispatch or service operations',
+      'Supports higher quote volume and stronger internal visibility',
+      'Balanced option for teams moving beyond MVP-level process',
+    ],
   },
   {
-    name: 'Enterprise',
-    description: 'For high-volume businesses needing dedicated logistics coordination.',
-    bullets: ['Unlimited monthly dispatch volume', 'Dedicated account and operations manager', 'Custom routing, warehousing, and procurement support'],
+    name: 'Custom Operations',
+    description: 'For businesses that need tailored workflows, wider service coverage, or future module expansion.',
+    bullets: [
+      'Best for more customized business operations',
+      'Useful when service logic or approval flow differs by client',
+      'Ideal when a business plans to evolve beyond the base workflow',
+    ],
   },
 ]
 
 function Pricing() {
   return (
     <section className="space-y-8 py-12 sm:py-16">
-      <div>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Pricing Plans</h1>
-        <p className="mt-2 text-slate-600">Choose the service level that fits your route complexity and monthly volume.</p>
+      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-700">Commercial approach</p>
+        <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">Operations are typically priced around route scope, service level, and delivery volume.</h1>
+        <p className="mt-3 max-w-3xl text-slate-600">
+          The tiers below are engagement guides for how a logistics business might package support. Final pricing is usually tailored to route frequency, shipment type, and response expectations.
+        </p>
       </div>
+
       <div className="grid gap-4 lg:grid-cols-3">
         {pricingTiers.map((tier) => (
           <Card
@@ -35,7 +51,7 @@ function Pricing() {
           >
             {tier.popular && (
               <span className="absolute -top-3 right-4 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
-                Most Popular
+                Recommended
               </span>
             )}
             <h2 className="text-2xl font-semibold text-slate-900">{tier.name}</h2>
@@ -43,14 +59,14 @@ function Pricing() {
             <ul className="mt-4 space-y-2 text-slate-600">
               {tier.bullets.map((bullet) => (
                 <li key={bullet} className="flex items-start gap-2">
-                  <span className="text-green-600">+</span>
+                  <span className="text-blue-600">+</span>
                   <span>{bullet}</span>
                 </li>
               ))}
             </ul>
             <div className="mt-5">
               <Button to="/quote" variant={tier.popular ? 'solid' : 'muted'} className="w-full">
-                Select {tier.name}
+                Discuss {tier.name}
               </Button>
             </div>
           </Card>

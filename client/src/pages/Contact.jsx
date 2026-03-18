@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { API_BASE_URL } from '../api/http'
+import { coverageCities } from '../content/siteContent'
 
 const contactSchema = z.object({
   full_name: z.string().trim().min(2, 'Full name must be at least 2 characters'),
@@ -69,7 +70,7 @@ function Contact() {
         throw new Error(message)
       }
 
-      setToast({ type: 'success', message: 'Message sent successfully. We will get back to you soon.' })
+      setToast({ type: 'success', message: 'Message sent successfully. We will review it and respond shortly.' })
       setSubmitState('success')
       reset(defaultValues)
     } catch (error) {
@@ -83,31 +84,33 @@ function Contact() {
 
   return (
     <section className="space-y-8 py-12 sm:py-16">
-      <div>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Contact Operations Desk</h1>
-        <p className="mt-2 text-slate-600">Reach our team for dispatch support, onboarding, and route planning.</p>
+      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-700">Operations contact</p>
+        <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">Speak to the team about routes, service fit, or dispatch requirements.</h1>
+        <p className="mt-3 max-w-3xl text-slate-600">
+          Use this channel for operational questions, onboarding conversations, or service clarifications. For pricing and route-specific needs, the quote form is still the fastest path.
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
         <article className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Contact Information</h2>
-            <p className="mt-2 text-slate-600">Lagos Operations HQ</p>
-            <p className="text-slate-600">+234 800 000 0000</p>
-            <p className="text-slate-600">support@logidispatch.local</p>
+            <h2 className="text-lg font-semibold text-slate-900">Operations Desk</h2>
+            <p className="mt-2 text-slate-600">Business hours support for logistics, dispatch, and service inquiries.</p>
+            <p className="mt-3 text-slate-700">+234 800 100 2040</p>
+            <p className="text-slate-700">operations@logidispatch.app</p>
           </div>
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Operating Cities</h3>
+            <h3 className="text-base font-semibold text-slate-900">Typical coverage</h3>
             <ul className="mt-2 space-y-1 text-slate-600">
-              <li>- Lagos</li>
-              <li>- Abuja</li>
-              <li>- Port Harcourt</li>
-              <li>- Ibadan</li>
-              <li>- Kano</li>
+              {coverageCities.map((city) => (
+                <li key={city}>- {city}</li>
+              ))}
             </ul>
           </div>
-          <div className="h-32 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3 text-sm text-slate-500">
-            Map placeholder
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <p className="font-semibold text-slate-900">Response guidance</p>
+            <p className="mt-2">Quote requests are usually reviewed first because they include route and shipment context. General contact messages are best for onboarding, clarifications, and partnership conversations.</p>
           </div>
         </article>
 

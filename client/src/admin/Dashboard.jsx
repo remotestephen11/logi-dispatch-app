@@ -63,8 +63,22 @@ function Dashboard() {
         </div>
       </div>
 
-      {loading && <p>Loading dashboard summary...</p>}
-      {!loading && error && <p className="form-error">{error}</p>}
+      {loading && (
+        <div className="admin-summary-grid">
+          {summaryCards.map((card) => (
+            <article key={card.key} className="card admin-summary-card admin-loading-card">
+              <p className="admin-summary-label">{card.label}</p>
+              <p className="admin-summary-value">...</p>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="admin-alert admin-alert-error">
+          <p>{error}</p>
+        </div>
+      )}
 
       {!loading && !error && (
         <>

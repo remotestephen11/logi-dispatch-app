@@ -67,7 +67,14 @@ function BlogPost() {
               <span>5 min read</span>
             </div>
             {post.excerpt && <p className="mt-4 text-slate-600">{post.excerpt}</p>}
-            <p className="mt-5 whitespace-pre-wrap text-slate-700">{post.content}</p>
+            <div className="mt-5 space-y-4 text-slate-700">
+              {String(post.content)
+                .split('\n\n')
+                .filter(Boolean)
+                .map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+            </div>
           </article>
 
           <aside className="lg:sticky lg:top-24 lg:h-fit">

@@ -92,6 +92,7 @@
   border-radius: 8px;
   font-weight: 600;
   border: 1px solid transparent;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .btn-primary {
@@ -362,6 +363,13 @@
   min-width: 0;
 }
 
+.admin-auth-card {
+  width: min(520px, 100%);
+  margin: auto;
+  align-self: center;
+  padding: 1.5rem;
+}
+
 .admin-page {
   padding: 1.5rem 0;
 }
@@ -438,6 +446,10 @@
   margin-bottom: 1rem;
 }
 
+.admin-panel-card {
+  padding: 1.25rem;
+}
+
 .admin-checkbox-field {
   margin-top: 0.25rem;
 }
@@ -480,6 +492,11 @@
   color: #334155;
 }
 
+.admin-table td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
 .admin-table tbody tr {
   transition: background-color 0.15s ease;
 }
@@ -508,6 +525,49 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8rem;
   margin: 0;
+}
+
+.admin-alert,
+.admin-feedback-state {
+  border-radius: 12px;
+  border: 1px solid #dbe4ef;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.admin-alert {
+  margin-bottom: 1rem;
+}
+
+.admin-alert p,
+.admin-feedback-state p {
+  margin: 0;
+}
+
+.admin-alert-error {
+  border-color: #fecaca;
+  background: #fff7f7;
+  color: #991b1b;
+}
+
+.admin-feedback-state {
+  display: grid;
+  gap: 0.3rem;
+  text-align: center;
+  color: #475569;
+}
+
+.admin-feedback-title {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-feedback-copy {
+  color: #64748b;
+}
+
+.admin-loading-card {
+  opacity: 0.8;
 }
 
 .toast {

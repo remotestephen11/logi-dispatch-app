@@ -1,5 +1,5 @@
 function Card({ children, className = '' }) {
-  return <article className={`rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${className}`.trim()}>{children}</article>
+  return <article className={`rounded-3xl border border-slate-200 bg-white p-6 shadow-sm ${className}`.trim()}>{children}</article>
 }
 
 function CardTitle({ children, className = '' }) {

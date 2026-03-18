@@ -21,13 +21,22 @@ async function request(path, options = {}) {
     },
   })
 
-  const payload = await response.json()
+  let payload = null
+
+  try {
+    payload = await response.json()
+  } catch {
+    payload = null
+  }
 
   if (response.status === 401) {
     logout()
+    if (window.location.pathname.startsWith('/admin')) {
+      window.location.replace('/admin/login')
+    }
   }
 
-  if (!response.ok || !payload.ok) {
+  if (!response.ok || !payload?.ok) {
     throw new Error(payload?.error?.message || 'Request failed')
   }
 

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Container from './Container'
+import { coverageCities } from '../content/siteContent'
 
 function Footer() {
   return (
@@ -7,11 +8,11 @@ function Footer() {
       <Container className="grid gap-8 py-10 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <h3 className="mb-2 text-base font-semibold text-white">LogiDispatch</h3>
-          <p>Reliable dispatch, haulage, and last-mile support for teams operating across Nigeria.</p>
+          <p>A logistics dispatch platform for service businesses that need stronger quote capture, clearer service positioning, and practical admin visibility.</p>
         </div>
 
         <div>
-          <h3 className="mb-2 text-base font-semibold text-white">Quick Links</h3>
+          <h3 className="mb-2 text-base font-semibold text-white">Navigation</h3>
           <ul className="space-y-1">
             <li><Link className="hover:text-white" to="/services">Services</Link></li>
             <li><Link className="hover:text-white" to="/pricing">Pricing</Link></li>
@@ -21,17 +22,17 @@ function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-2 text-base font-semibold text-white">Contact</h3>
-          <p>Lagos Operations Desk</p>
-          <p>support@logidispatch.local</p>
-          <p>Mon - Sat, 8:00am - 6:00pm</p>
+          <h3 className="mb-2 text-base font-semibold text-white">Coverage</h3>
+          <p>{coverageCities.join(', ')}</p>
+          <p className="mt-2">Operations Desk</p>
+          <p>operations@logidispatch.app</p>
         </div>
 
         <div>
-          <h3 className="mb-2 text-base font-semibold text-white">Company</h3>
-          <p>Built for dependable shipment coordination and transparent customer updates.</p>
+          <h3 className="mb-2 text-base font-semibold text-white">Platform</h3>
+          <p>Public website, quote workflow, content publishing, and admin operations in one full-stack product.</p>
           <p className="mt-2">
-            <Link className="text-xs text-slate-400 hover:text-slate-600" to="/admin/login">Admin</Link>
+            <Link className="text-xs text-slate-400 hover:text-white" to="/admin/login">Admin</Link>
           </p>
           <p className="mt-2 text-slate-400">Copyright {new Date().getFullYear()} LogiDispatch.</p>
         </div>

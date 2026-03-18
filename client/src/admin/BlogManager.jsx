@@ -27,6 +27,7 @@ function BlogManager() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState(null)
   const [editingId, setEditingId] = useState(null)
@@ -141,6 +142,7 @@ function BlogManager() {
     }
 
     setError('')
+    setDeletingId(id)
 
     try {
       await deleteBlogPost(id)
@@ -154,6 +156,8 @@ function BlogManager() {
       const message = err.message || 'Failed to delete blog post'
       setError(message)
       setNotice({ type: 'error', message })
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -168,10 +172,14 @@ function BlogManager() {
       </div>
 
       {notice && <div className={`toast toast-${notice.type}`}>{notice.message}</div>}
-      {error && <p className="form-error">{error}</p>}
+      {error && (
+        <div className="admin-alert admin-alert-error">
+          <p>{error}</p>
+        </div>
+      )}
 
       <div className="admin-section-grid">
-        <section className="card">
+        <section className="card admin-panel-card">
           <div className="admin-section-heading">
             <div>
               <h3>{editingId ? 'Edit Post' : 'Create Post'}</h3>
@@ -250,7 +258,7 @@ function BlogManager() {
                 {saving ? 'Saving...' : editingId ? 'Update Post' : 'Create Post'}
               </button>
               {editingId && (
-                <button type="button" className="btn btn-muted" onClick={resetForm}>
+                <button type="button" className="btn btn-muted" onClick={resetForm} disabled={saving}>
                   Cancel Edit
                 </button>
               )}
@@ -258,7 +266,7 @@ function BlogManager() {
           </form>
         </section>
 
-        <section className="card">
+        <section className="card admin-panel-card">
           <div className="admin-section-heading">
             <div>
               <h3>Posts</h3>
@@ -266,8 +274,19 @@ function BlogManager() {
             </div>
           </div>
 
-          {loading && <p>Loading blog posts...</p>}
-          {!loading && posts.length === 0 && <p>No blog posts found.</p>}
+          {loading && (
+            <div className="admin-feedback-state">
+              <p className="admin-feedback-title">Loading blog posts...</p>
+              <p className="admin-feedback-copy">Fetching your current content library.</p>
+            </div>
+          )}
+
+          {!loading && posts.length === 0 && (
+            <div className="admin-feedback-state">
+              <p className="admin-feedback-title">No blog posts yet</p>
+              <p className="admin-feedback-copy">Create your first post from the form above to start populating the blog.</p>
+            </div>
+          )}
 
           {!loading && posts.length > 0 && (
             <div className="admin-table-wrap">
@@ -290,11 +309,21 @@ function BlogManager() {
                       <td>{formatDate(post.created_at)}</td>
                       <td>
                         <div className="admin-inline-actions">
-                          <button type="button" className="btn btn-muted" onClick={() => startEdit(post)}>
+                          <button
+                            type="button"
+                            className="btn btn-muted"
+                            onClick={() => startEdit(post)}
+                            disabled={deletingId === post.id}
+                          >
                             Edit
                           </button>
-                          <button type="button" className="btn btn-danger" onClick={() => handleDelete(post.id)}>
-                            Delete
+                          <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => handleDelete(post.id)}
+                            disabled={deletingId === post.id}
+                          >
+                            {deletingId === post.id ? 'Deleting...' : 'Delete'}
                           </button>
                         </div>
                       </td>

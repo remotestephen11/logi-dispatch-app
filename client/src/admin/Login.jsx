@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { getToken, login } from '../api/auth'
 
 function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const token = getToken()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,7 +24,8 @@ function Login() {
 
     try {
       await login(email, password)
-      navigate('/admin/dashboard', { replace: true })
+      const redirectTo = location.state?.from?.pathname || '/admin/dashboard'
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       const message = err.message || 'Login failed'
       setErrorMessage(message)
@@ -35,7 +37,7 @@ function Login() {
 
   return (
     <main className="admin-app-shell">
-      <section className="card" style={{ maxWidth: '520px', width: '100%', margin: '0 auto', alignSelf: 'center' }}>
+      <section className="card admin-auth-card">
         <p className="admin-kicker">Secure Access</p>
         <h1>Admin Login</h1>
         <p className="admin-page-copy">Sign in to manage the dashboard, blog, and quotes.</p>

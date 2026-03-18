@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS quotes (
   weight_kg REAL,
   value_amount REAL,
   attachment_path TEXT,
-  status TEXT NOT NULL DEFAULT 'new',
+  status TEXT NOT NULL DEFAULT 'pending',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );

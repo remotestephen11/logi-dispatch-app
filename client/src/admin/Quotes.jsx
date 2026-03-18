@@ -20,6 +20,7 @@ function Quotes() {
   const [quotes, setQuotes] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState(null)
 
@@ -73,6 +74,8 @@ function Quotes() {
 
   const handleStatusChange = async (id, status) => {
     const previousQuotes = quotes
+    setError('')
+    setStatusUpdatingId(id)
     setQuotes((current) => current.map((quote) => (quote.id === id ? { ...quote, status } : quote)))
 
     try {
@@ -84,6 +87,8 @@ function Quotes() {
       const message = err.message || 'Failed to update quote status'
       setError(message)
       setNotice({ type: 'error', message })
+    } finally {
+      setStatusUpdatingId(null)
     }
   }
 
@@ -98,14 +103,28 @@ function Quotes() {
       </div>
 
       {notice && <div className={`toast toast-${notice.type}`}>{notice.message}</div>}
-      {error && <p className="form-error">{error}</p>}
-      {loading && <p>Loading quotes...</p>}
+      {error && (
+        <div className="admin-alert admin-alert-error">
+          <p>{error}</p>
+        </div>
+      )}
+      {loading && (
+        <div className="admin-feedback-state">
+          <p className="admin-feedback-title">Loading quotes...</p>
+          <p className="admin-feedback-copy">Pulling the latest quote submissions.</p>
+        </div>
+      )}
 
-      {!loading && !error && quotes.length === 0 && <p>No quotes found.</p>}
+      {!loading && !error && quotes.length === 0 && (
+        <div className="admin-feedback-state">
+          <p className="admin-feedback-title">No quotes yet</p>
+          <p className="admin-feedback-copy">New quote requests will appear here as soon as customers submit them.</p>
+        </div>
+      )}
 
       {!loading && quotes.length > 0 && (
         <div className="admin-section-grid admin-section-grid-wide">
-          <section className="card">
+          <section className="card admin-panel-card">
             <div className="admin-section-heading">
               <div>
                 <h3>Submitted Quotes</h3>
@@ -143,7 +162,7 @@ function Quotes() {
             </div>
           </section>
 
-          <section className="card">
+          <section className="card admin-panel-card">
             <div className="admin-section-heading">
               <div>
                 <h3>Quote Details</h3>
@@ -159,6 +178,7 @@ function Quotes() {
                     id="quote-status"
                     value={selectedQuote.status}
                     onChange={(event) => handleStatusChange(selectedQuote.id, event.target.value)}
+                    disabled={statusUpdatingId === selectedQuote.id}
                   >
                     {statuses.map((status) => (
                       <option key={status} value={status}>
@@ -166,6 +186,9 @@ function Quotes() {
                       </option>
                     ))}
                   </select>
+                  {statusUpdatingId === selectedQuote.id && (
+                    <p className="form-note">Updating quote status...</p>
+                  )}
                 </div>
 
                 <dl className="admin-detail-grid">

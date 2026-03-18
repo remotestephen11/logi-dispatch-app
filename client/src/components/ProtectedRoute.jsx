@@ -5,7 +5,7 @@ function ProtectedRoute({ children }) {
   const location = useLocation()
   const token = getToken()
 
-  if (!token) {
+  if (!token || !token.trim()) {
     return <Navigate to="/admin/login" replace state={{ from: location }} />
   }
 

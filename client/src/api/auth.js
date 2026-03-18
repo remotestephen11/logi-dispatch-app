@@ -2,6 +2,14 @@ import { API_BASE_URL } from './http'
 
 const ADMIN_TOKEN_KEY = 'admin_token'
 
+function setToken(token) {
+  localStorage.setItem(ADMIN_TOKEN_KEY, token)
+}
+
+function clearToken() {
+  localStorage.removeItem(ADMIN_TOKEN_KEY)
+}
+
 export async function login(email, password) {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
@@ -22,7 +30,7 @@ export async function login(email, password) {
     throw new Error('Login failed')
   }
 
-  localStorage.setItem(ADMIN_TOKEN_KEY, token)
+  setToken(token)
   return payload.data
 }
 
@@ -31,5 +39,5 @@ export function getToken() {
 }
 
 export function logout() {
-  localStorage.removeItem(ADMIN_TOKEN_KEY)
+  clearToken()
 }
