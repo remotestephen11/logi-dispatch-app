@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchAdminSummary } from '../api/admin'
+import { fetchAdminBlog, fetchAdminSummary, fetchQuotes } from '../api/admin'
 
 const emptySummary = {
   totalBlogPosts: 0,
@@ -14,13 +14,82 @@ const summaryCards = [
   { key: 'pendingQuotes', label: 'Pending Quotes' },
 ]
 
+function normalizeStatus(status) {
+  if (status === 'new') {
+    return 'pending'
+  }
+
+  if (status === 'in_progress') {
+    return 'contacted'
+  }
+
+  return status || 'pending'
+}
+
+function formatDate(value) {
+  if (!value) {
+    return 'Recent'
+  }
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return date.toLocaleDateString()
+}
+
 function Dashboard() {
   const [summary, setSummary] = useState(emptySummary)
+  const [recentBlogTitle, setRecentBlogTitle] = useState('No blog posts yet')
+  const [recentQuoteLabel, setRecentQuoteLabel] = useState('No quotes yet')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
+
+    const loadRecentActivity = async ({ useForSummary = false } = {}) => {
+      const [blogResult, quoteResult] = await Promise.allSettled([
+        fetchAdminBlog(),
+        fetchQuotes(),
+      ])
+
+      const blogPosts = blogResult.status === 'fulfilled' && Array.isArray(blogResult.value)
+        ? blogResult.value
+        : []
+      const quotes = quoteResult.status === 'fulfilled' && Array.isArray(quoteResult.value)
+        ? quoteResult.value
+        : []
+
+      if (!isMounted) {
+        return
+      }
+
+      if (useForSummary) {
+        setSummary({
+          totalBlogPosts: blogPosts.length,
+          totalQuotes: quotes.length,
+          pendingQuotes: quotes.filter((quote) => normalizeStatus(quote.status) === 'pending').length,
+        })
+      }
+
+      setRecentBlogTitle(blogPosts[0]?.title || 'No blog posts yet')
+
+      if (quotes[0]) {
+        setRecentQuoteLabel(
+          `#${quotes[0].id} | ${normalizeStatus(quotes[0].status)} | ${formatDate(quotes[0].created_at)}`,
+        )
+      } else {
+        setRecentQuoteLabel('No quotes yet')
+      }
+
+      if (blogResult.status === 'rejected' && quoteResult.status === 'rejected') {
+        const blogMessage = blogResult.reason?.message
+        const quoteMessage = quoteResult.reason?.message
+        setError(blogMessage || quoteMessage || 'Failed to load admin dashboard')
+      }
+    }
 
     const loadSummary = async () => {
       try {
@@ -35,10 +104,10 @@ function Dashboard() {
             pendingQuotes: data.pendingQuotes || 0,
           })
         }
-      } catch (err) {
-        if (isMounted) {
-          setError(err.message || 'Failed to load admin summary')
-        }
+
+        await loadRecentActivity()
+      } catch {
+        await loadRecentActivity({ useForSummary: true })
       } finally {
         if (isMounted) {
           setLoading(false)
@@ -89,6 +158,17 @@ function Dashboard() {
                 <p className="admin-summary-value">{summary[card.key]}</p>
               </article>
             ))}
+          </div>
+
+          <div className="admin-shortcuts-grid">
+            <article className="card admin-shortcut-card">
+              <h3>Latest Blog Post</h3>
+              <p>{recentBlogTitle}</p>
+            </article>
+            <article className="card admin-shortcut-card">
+              <h3>Latest Quote Activity</h3>
+              <p>{recentQuoteLabel}</p>
+            </article>
           </div>
 
           <div className="admin-shortcuts-grid">

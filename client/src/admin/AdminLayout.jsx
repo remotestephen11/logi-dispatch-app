@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { logout } from '../api/auth'
 
 const navigationItems = [
-  { to: '/admin/dashboard', label: 'Dashboard' },
+  { to: '/admin', label: 'Dashboard', end: true },
   { to: '/admin/blog', label: 'Blog' },
   { to: '/admin/quotes', label: 'Quotes' },
 ]
@@ -29,6 +29,7 @@ function AdminLayout() {
             <NavLink
               key={item.to}
               to={item.to}
+              end={item.end}
               className={({ isActive }) => (isActive ? 'admin-link active' : 'admin-link')}
             >
               {item.label}

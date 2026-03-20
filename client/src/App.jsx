@@ -59,10 +59,11 @@ function App() {
           </ProtectedRoute>
         )}
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route index element={<AdminDashboard />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="blog" element={<AdminBlogManager />} />
         <Route path="quotes" element={<AdminQuotes />} />
+        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
