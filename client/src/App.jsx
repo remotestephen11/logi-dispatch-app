@@ -16,6 +16,7 @@ import AdminLayout from './admin/AdminLayout'
 import AdminDashboard from './admin/Dashboard'
 import AdminQuotes from './admin/Quotes'
 import AdminBlogManager from './admin/BlogManager'
+import AdminMessages from './admin/Messages'
 import ProtectedRoute from './components/ProtectedRoute'
 import Container from './components/Container'
 import './App.css'
@@ -63,6 +64,7 @@ function App() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="blog" element={<AdminBlogManager />} />
         <Route path="quotes" element={<AdminQuotes />} />
+        <Route path="messages" element={<AdminMessages />} />
         <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
 

@@ -5,6 +5,7 @@ const navigationItems = [
   { to: '/admin', label: 'Dashboard', end: true },
   { to: '/admin/blog', label: 'Blog' },
   { to: '/admin/quotes', label: 'Quotes' },
+  { to: '/admin/messages', label: 'Messages' },
 ]
 
 function AdminLayout() {

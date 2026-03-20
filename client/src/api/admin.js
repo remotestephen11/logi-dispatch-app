@@ -51,6 +51,24 @@ export function fetchQuotes() {
   return request('/api/admin/quotes')
 }
 
+export function fetchMessages() {
+  return request('/api/admin/messages')
+}
+
+export function fetchMessage(id) {
+  return request(`/api/admin/messages/${id}`)
+}
+
+export function updateMessageStatus(id, status) {
+  return request(`/api/admin/messages/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status }),
+  })
+}
+
 export function updateQuoteStatus(id, status) {
   return request(`/api/admin/quotes/${id}/status`, {
     method: 'PATCH',

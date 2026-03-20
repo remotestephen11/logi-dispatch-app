@@ -28,10 +28,25 @@ function normalizeQuoteStatus(status) {
   return status || 'pending'
 }
 
+function normalizeMessageStatus(status) {
+  if (status === 'in_progress') {
+    return 'read'
+  }
+
+  return status || 'new'
+}
+
 function mapQuote(row) {
   return {
     ...row,
     status: normalizeQuoteStatus(row.status),
+  }
+}
+
+function mapMessage(row) {
+  return {
+    ...row,
+    status: normalizeMessageStatus(row.status),
   }
 }
 
@@ -98,6 +113,77 @@ router.get('/quotes/:id', async (req, res, next) => {
     }
 
     return ok(res, mapQuote(row), {})
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/messages', async (req, res, next) => {
+  try {
+    const rows = await db.all(
+      `SELECT id, full_name, email, subject, message, status, created_at
+       FROM messages
+       ORDER BY datetime(created_at) DESC, id DESC
+       LIMIT 200`,
+    )
+
+    return ok(res, rows.map(mapMessage), { count: rows.length })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/messages/:id', async (req, res, next) => {
+  try {
+    const messageId = Number(req.params.id)
+    if (!Number.isInteger(messageId) || messageId <= 0) {
+      return fail(res, 'VALIDATION_ERROR', 'Invalid message id', 400)
+    }
+
+    const row = await db.get(
+      `SELECT id, full_name, email, subject, message, status, created_at
+       FROM messages
+       WHERE id = ?`,
+      [messageId],
+    )
+
+    if (!row) {
+      return fail(res, 'NOT_FOUND', 'Message not found', 404)
+    }
+
+    return ok(res, mapMessage(row), {})
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.patch('/messages/:id/status', async (req, res, next) => {
+  try {
+    const messageId = Number(req.params.id)
+    if (!Number.isInteger(messageId) || messageId <= 0) {
+      return fail(res, 'VALIDATION_ERROR', 'Invalid message id', 400)
+    }
+
+    const nextStatus = String(req.body?.status || '').trim()
+    const allowedStatuses = new Set(['new', 'read', 'closed'])
+
+    if (!allowedStatuses.has(nextStatus)) {
+      return fail(res, 'VALIDATION_ERROR', 'Invalid message status', 400)
+    }
+
+    const result = await db.run('UPDATE messages SET status = ? WHERE id = ?', [nextStatus, messageId])
+    if (result.changes === 0) {
+      return fail(res, 'NOT_FOUND', 'Message not found', 404)
+    }
+
+    const row = await db.get(
+      `SELECT id, full_name, email, subject, message, status, created_at
+       FROM messages
+       WHERE id = ?`,
+      [messageId],
+    )
+
+    return ok(res, mapMessage(row), {})
   } catch (err) {
     next(err)
   }
