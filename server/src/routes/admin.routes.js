@@ -133,6 +133,26 @@ router.get('/messages', async (req, res, next) => {
   }
 })
 
+router.get('/messages/summary', async (req, res, next) => {
+  try {
+    const [totalRow, unreadRow] = await Promise.all([
+      db.get('SELECT COUNT(*) AS count FROM messages'),
+      db.get("SELECT COUNT(*) AS count FROM messages WHERE status IN ('new', 'unread')"),
+    ])
+
+    return ok(
+      res,
+      {
+        totalMessages: totalRow?.count || 0,
+        unreadMessages: unreadRow?.count || 0,
+      },
+      {},
+    )
+  } catch (err) {
+    next(err)
+  }
+})
+
 router.get('/messages/:id', async (req, res, next) => {
   try {
     const messageId = Number(req.params.id)

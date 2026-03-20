@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchAdminBlog, fetchAdminSummary, fetchQuotes } from '../api/admin'
+import { fetchAdminBlog, fetchAdminSummary, fetchMessageSummary, fetchMessages, fetchQuotes } from '../api/admin'
 
 const emptySummary = {
   totalBlogPosts: 0,
   totalQuotes: 0,
   pendingQuotes: 0,
+  totalMessages: 0,
+  unreadMessages: 0,
 }
 
 const summaryCards = [
@@ -43,16 +45,21 @@ function Dashboard() {
   const [summary, setSummary] = useState(emptySummary)
   const [recentBlogTitle, setRecentBlogTitle] = useState('No blog posts yet')
   const [recentQuoteLabel, setRecentQuoteLabel] = useState('No quotes yet')
+  const [messageSummary, setMessageSummary] = useState({
+    totalMessages: 0,
+    unreadMessages: 0,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
 
-    const loadRecentActivity = async ({ useForSummary = false } = {}) => {
-      const [blogResult, quoteResult] = await Promise.allSettled([
+    const loadRecentActivity = async ({ useForSummary = false, useForMessageSummary = false } = {}) => {
+      const [blogResult, quoteResult, messageResult] = await Promise.allSettled([
         fetchAdminBlog(),
         fetchQuotes(),
+        fetchMessages(),
       ])
 
       const blogPosts = blogResult.status === 'fulfilled' && Array.isArray(blogResult.value)
@@ -60,6 +67,9 @@ function Dashboard() {
         : []
       const quotes = quoteResult.status === 'fulfilled' && Array.isArray(quoteResult.value)
         ? quoteResult.value
+        : []
+      const messages = messageResult.status === 'fulfilled' && Array.isArray(messageResult.value)
+        ? messageResult.value
         : []
 
       if (!isMounted) {
@@ -71,6 +81,15 @@ function Dashboard() {
           totalBlogPosts: blogPosts.length,
           totalQuotes: quotes.length,
           pendingQuotes: quotes.filter((quote) => normalizeStatus(quote.status) === 'pending').length,
+          totalMessages: messages.length,
+          unreadMessages: messages.filter((message) => message.status === 'new' || message.status === 'unread').length,
+        })
+      }
+
+      if (useForMessageSummary) {
+        setMessageSummary({
+          totalMessages: messages.length,
+          unreadMessages: messages.filter((message) => message.status === 'new' || message.status === 'unread').length,
         })
       }
 
@@ -84,10 +103,11 @@ function Dashboard() {
         setRecentQuoteLabel('No quotes yet')
       }
 
-      if (blogResult.status === 'rejected' && quoteResult.status === 'rejected') {
+      if (blogResult.status === 'rejected' && quoteResult.status === 'rejected' && messageResult.status === 'rejected') {
         const blogMessage = blogResult.reason?.message
         const quoteMessage = quoteResult.reason?.message
-        setError(blogMessage || quoteMessage || 'Failed to load admin dashboard')
+        const messageError = messageResult.reason?.message
+        setError(blogMessage || quoteMessage || messageError || 'Failed to load admin dashboard')
       }
     }
 
@@ -95,19 +115,28 @@ function Dashboard() {
       try {
         setLoading(true)
         setError('')
-        const data = await fetchAdminSummary()
+        const [data, messageData] = await Promise.all([
+          fetchAdminSummary(),
+          fetchMessageSummary(),
+        ])
 
         if (isMounted) {
           setSummary({
             totalBlogPosts: data.totalBlogPosts || 0,
             totalQuotes: data.totalQuotes || 0,
             pendingQuotes: data.pendingQuotes || 0,
+            totalMessages: messageData.totalMessages || 0,
+            unreadMessages: messageData.unreadMessages || 0,
+          })
+          setMessageSummary({
+            totalMessages: messageData.totalMessages || 0,
+            unreadMessages: messageData.unreadMessages || 0,
           })
         }
 
         await loadRecentActivity()
       } catch {
-        await loadRecentActivity({ useForSummary: true })
+        await loadRecentActivity({ useForSummary: true, useForMessageSummary: true })
       } finally {
         if (isMounted) {
           setLoading(false)
@@ -134,7 +163,7 @@ function Dashboard() {
 
       {loading && (
         <div className="admin-summary-grid">
-          {summaryCards.map((card) => (
+          {[...summaryCards, { key: 'messages', label: 'Messages' }].map((card) => (
             <article key={card.key} className="card admin-summary-card admin-loading-card">
               <p className="admin-summary-label">{card.label}</p>
               <p className="admin-summary-value">...</p>
@@ -158,6 +187,23 @@ function Dashboard() {
                 <p className="admin-summary-value">{summary[card.key]}</p>
               </article>
             ))}
+            <Link
+              className={`card admin-summary-card admin-summary-link ${messageSummary.unreadMessages > 0 ? 'admin-summary-card-attention' : ''}`}
+              to="/admin/messages"
+            >
+              <div className="admin-summary-head">
+                <p className="admin-summary-label">Messages</p>
+                {messageSummary.unreadMessages > 0 && (
+                  <span className="admin-summary-badge">{messageSummary.unreadMessages} unread</span>
+                )}
+              </div>
+              <p className="admin-summary-value">{messageSummary.totalMessages}</p>
+              <p className="admin-summary-copy">
+                {messageSummary.unreadMessages > 0
+                  ? `${messageSummary.unreadMessages} unread messages need review`
+                  : 'No unread messages'}
+              </p>
+            </Link>
           </div>
 
           <div className="admin-shortcuts-grid">

@@ -401,10 +401,27 @@
   padding: 1.2rem;
 }
 
+.admin-summary-link {
+  display: block;
+  color: inherit;
+}
+
+.admin-summary-link:hover {
+  text-decoration: none;
+}
+
 .admin-summary-label {
   margin-bottom: 0.5rem;
   color: #475569;
   font-weight: 600;
+}
+
+.admin-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .admin-summary-value {
@@ -412,6 +429,29 @@
   font-size: 2rem;
   font-weight: 700;
   color: #0f172a;
+}
+
+.admin-summary-copy {
+  margin-top: 0.6rem;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.admin-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.admin-summary-card-attention {
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #fff7f7 0%, #ffffff 100%);
+  box-shadow: 0 12px 30px rgba(185, 28, 28, 0.08);
 }
 
 .admin-shortcuts-grid {

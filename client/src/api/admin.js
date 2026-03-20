@@ -55,6 +55,10 @@ export function fetchMessages() {
   return request('/api/admin/messages')
 }
 
+export function fetchMessageSummary() {
+  return request('/api/admin/messages/summary')
+}
+
 export function fetchMessage(id) {
   return request(`/api/admin/messages/${id}`)
 }
