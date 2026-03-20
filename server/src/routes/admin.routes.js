@@ -29,11 +29,23 @@ function normalizeQuoteStatus(status) {
 }
 
 function normalizeMessageStatus(status) {
+  if (status === 'unread') {
+    return 'new'
+  }
+
   if (status === 'in_progress') {
     return 'read'
   }
 
+  if (status === 'archived') {
+    return 'closed'
+  }
+
   return status || 'new'
+}
+
+function normalizeIncomingMessageStatus(status) {
+  return normalizeMessageStatus(String(status || '').trim())
 }
 
 function mapQuote(row) {
@@ -184,7 +196,7 @@ router.patch('/messages/:id/status', async (req, res, next) => {
       return fail(res, 'VALIDATION_ERROR', 'Invalid message id', 400)
     }
 
-    const nextStatus = String(req.body?.status || '').trim()
+    const nextStatus = normalizeIncomingMessageStatus(req.body?.status)
     const allowedStatuses = new Set(['new', 'read', 'closed'])
 
     if (!allowedStatuses.has(nextStatus)) {
